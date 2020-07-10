@@ -5,6 +5,7 @@ const cors = require("cors")
 const helmet = require("helmet")
 const {NODE_ENV} = require("./config")
 
+const artistsRouter = require("./artists/artists-router")
 
 const app = express()
 
@@ -16,9 +17,10 @@ app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
 
-// place functions here
+app.use("/api/artists", artistsRouter)
+
 app.get("/", (req, res) => {
-    res.send("Hello, boilerplate!");
+    res.json({ok: true})
 })
 
 app.use(function errorHandler(error, req, res, next){
