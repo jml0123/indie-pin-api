@@ -5,7 +5,6 @@ const ArtistsService = {
     getTopArtists(knex) {
         return knex.select('*')
         .from('artists')
-        .where('popularity', '<', 75)
         .orderBy('popularity', 'desc')
         .limit(50);
     },

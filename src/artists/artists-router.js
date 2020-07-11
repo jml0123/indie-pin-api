@@ -36,6 +36,7 @@ artistsRouter.route("/")
         .catch(next)
     })
     .post(jsonParser, async (req, res, next) => {
+        console.log(req.body)
         const knexInstance = req.app.get('db');
         const {
             artist_name, spotify_id, popularity, 
@@ -179,7 +180,7 @@ artistsRouter.route("/")
         });
 
     artistsRouter
-        .route("/top/75_under")
+        .route("/top/50")
         .get((req, res, next) => {
             const knexInstance = req.app.get("db");
             ArtistsService.getTopArtists(knexInstance)
