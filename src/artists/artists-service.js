@@ -51,7 +51,7 @@ const ArtistsService = {
     deleteArtistBySpotifyId(knex, spotify_id) {
         return knex.from('artists').where({ spotify_id }).delete();
     },
-    updateArtistsById(knex, id, updatedArtist) {
+    updateArtist(knex, id, updatedArtist) {
         return knex
           .from('artists')
           .where({ id })
