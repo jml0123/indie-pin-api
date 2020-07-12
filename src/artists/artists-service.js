@@ -8,27 +8,6 @@ const ArtistsService = {
         .orderBy('popularity', 'desc')
         .limit(50);
     },
-    getTopArtists50(knex) {
-        return knex.select('*')
-        .from('artists')
-        .where('popularity', '<', 50)
-        .orderBy('popularity', 'desc')
-        .limit(50);
-    },
-    getTopArtists20(knex) {
-        return knex.select('*')
-        .from('artists')
-        .where('popularity', '<', 20)
-        .orderBy('popularity', 'desc')
-        .limit(25);
-    },
-    getTopArtists10(knex) {
-        return knex.select('*')
-        .from('artists')
-        .where('popularity', '<', 10)
-        .orderBy('popularity', 'desc')
-        .limit(25);
-    },
     insertArtist(knex, newArtist) {
       return knex
         .insert(newArtist)

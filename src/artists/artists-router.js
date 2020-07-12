@@ -189,38 +189,5 @@ artistsRouter.route("/")
             })
             .catch(next)
         })
-
-    artistsRouter
-        .route("/top/50_under")
-        .get((req, res, next) => {
-            const knexInstance = req.app.get("db");
-            ArtistsService.getTopArtists50(knexInstance)
-            .then((artists) => {
-                res.json(artists.map(serializeArtist))
-            })
-            .catch(next)
-        })
-    
-    artistsRouter
-        .route("/top/20_under")
-        .get((req, res, next) => {
-            const knexInstance = req.app.get("db");
-            ArtistsService.getTopArtists20(knexInstance)
-            .then((artists) => {
-                res.json(artists.map(serializeArtist))
-            })
-            .catch(next)
-        })
-       
-    artistsRouter
-        .route("/top/10_under")
-        .get((req, res, next) => {
-            const knexInstance = req.app.get("db");
-            ArtistsService.getTopArtists10(knexInstance)
-            .then((artists) => {
-                res.json(artists.map(serializeArtist))
-            })
-            .catch(next)
-        })
     
 module.exports = artistsRouter;
