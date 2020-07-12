@@ -35,15 +35,4 @@ VALUES
     ARRAY['https://open.spotify.com/artist/6XoXNsXj8wck0oVUNwxcmF']::TEXT[],
     'https://i.scdn.co/image/cb2e4e4dabc8134e8b69e35a283873bd2efdcb4d',
     ARRAY['']::TEXT[]
-),
-(
-    '0xvFgaDBtAV4uMCqWAr3tS', 
-    'JOON', 
-    1, 
-    ARRAY[-122.431297, 37.773972]::FLOAT(6)[],
-    'San Fransisco, CA',
-    'https://open.spotify.com/artist/0xvFgaDBtAV4uMCqWAr3tS',
-    ARRAY['https://open.spotify.com/artist/0xvFgaDBtAV4uMCqWAr3tS']::TEXT[],
-    'https://i.scdn.co/image/a3a584c8a769f1a5479a2310184d86770b0eb976',
-    ARRAY['']::TEXT[]
 );

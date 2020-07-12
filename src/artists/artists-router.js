@@ -2,9 +2,11 @@ const path = require("path");
 const express = require("express");
 const ArtistsService = require("./artists-service");
 const { json } = require("express");
+const _reverseGeocoder = require("../helpers/_reverseGeocoder")
 
 const artistsRouter = express.Router()
 const jsonParser = express.json();
+
 
 const serializeArtist = (artist) => ({
     "type":"Feature",
@@ -33,12 +35,13 @@ artistsRouter.route("/")
         })
         .catch(next)
     })
-    .post(jsonParser, (req, res, next) => {
+    .post(jsonParser, async (req, res, next) => {
+        console.log(req.body)
         const knexInstance = req.app.get('db');
         const {
             artist_name, spotify_id, popularity, 
             coordinates, genres, profile_img,
-            link_to_spotify, social_links, neighborhood
+            link_to_spotify, social_links
         } = req.body
         const newArtist = {
             artist_name, 
@@ -50,26 +53,29 @@ artistsRouter.route("/")
             link_to_spotify, 
             social_links,
         }
-        // Remove neighborhood from request body!! 
-        // call function to get neighborhood here based on coordaintes
-        newArtist.neighborhood = neighborhood 
-        for (const [key, value] of Object.entries(newArtist)) {
-            if (value == null) {
-                return res.status(400).json({
-                    error: {message: `Missing ${key} in request body`}
-                });
+        await _reverseGeocoder(coordinates[0], coordinates[1])
+        .then(place => {
+            if (!place) {
+                newArtist.neighborhood = "Location Unknown"
             }
-        }
-        // Find neighborhood based on coords here
-        ArtistsService.insertArtist(knexInstance, newArtist)
-            .then((artist) => {
-                res
-                    .status(201)
-                    .location(path.posix.join(req.originalUrl, `/${artist.id}`))
-                    .json(serializeArtist(artist))
-            })
-            .catch(next)
-    })
+            newArtist.neighborhood = `${place.record.name}, ${place.record.countryCode}`
+            for (const [key, value] of Object.entries(newArtist)) {
+                if (value == null) {
+                    return res.status(400).json({
+                        error: {message: `Missing ${key} in request body`}
+                    });
+                }
+            }
+            ArtistsService.insertArtist(knexInstance, newArtist)
+                .then((artist) => {
+                    res
+                        .status(201)
+                        .location(path.posix.join(req.originalUrl, `/${artist.id}`))
+                        .json(serializeArtist(artist))
+                })
+                .catch(next)
+            })      
+        })
 
     artistsRouter
         .route("/:artist_id")
@@ -102,12 +108,12 @@ artistsRouter.route("/")
             const knexInstance = req.app.get("db");
             const { 
                 coordinates, genres, profile_img,
-                social_links
+                social_links, popularity
             } = req.body;
             
             const updatedArtist = { 
                 coordinates, genres, profile_img,
-                social_links
+                social_links, popularity
             }
             
             ArtistsService.updateArtist(
@@ -122,8 +128,59 @@ artistsRouter.route("/")
             .catch(next)
         });
     
+        artistsRouter
+        .route("/sp/:spotify_id")
+        .all((req, res, next) => {
+            knexInstance = req.app.get("db");
+            ArtistsService.getByArtistSpotifyId(knexInstance, req.params.spotify_id)
+              .then((artist) => {
+                if (!artist) {
+                  return res.status(404).json({
+                    error: { message: `Artist doesn't exist!` },
+                  });
+                }
+                res.artist = artist;
+                next();
+              })
+              .catch(next);
+          })
+        .get((req, res, next) => {
+            res.json(serializeArtist(res.artist))
+        })
+        // Unusued by client!
+        .delete((req, res, next) => {
+            ArtistsService.deleteArtistBySpotifyId(knexInstance, req.params.spotify_id)
+                .then((AffectedEntries) => {
+                    res.status(204).end()
+                })
+                .catch(next)
+        })
+        .patch(jsonParser, (req, res, next)=>{
+            const knexInstance = req.app.get("db");
+            const { 
+                coordinates, genres, profile_img,
+                social_links, popularity
+            } = req.body;
+            
+            const updatedArtist = { 
+                coordinates, genres, profile_img,
+                social_links, popularity
+            }
+            
+            ArtistsService.updateArtistBySpotifyId(
+                knexInstance,
+                req.params.spotify_id,
+                updatedArtist
+            )
+            .then((artist) => {
+                res.status(200)
+                res.json(serializeArtist(artist))
+            })
+            .catch(next)
+        });
+
     artistsRouter
-        .route("/top/75_under")
+        .route("/top/50")
         .get((req, res, next) => {
             const knexInstance = req.app.get("db");
             ArtistsService.getTopArtists(knexInstance)
